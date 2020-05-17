@@ -183,10 +183,10 @@ class Solver():
 
 
     def load(self,path):
-        self.model = tf.keras.models.load_model(path,compile=False) #'drive/My Drive/saved_model/my_model'
+        self.model = tf.keras.models.load_model(path,compile=False)
 
     def save(self,path):
-        self.model.save(path) #'drive/My Drive/saved_model/my_model'
+        self.model.save(path)
         
 clf=Solver()
 #clf.train(n_iter=250,n_episodes_per_update=25,n_max_steps=100,discount_factor=0.95) #train
