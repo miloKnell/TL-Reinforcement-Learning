@@ -138,7 +138,7 @@ class Solver():
             keras.layers.Dense(4,activation='softmax',name='layer3'),
             ])
         
-    def train(self,n_iter,n_episodes_per_update,n_max_steps,discount_factor,plot=False):
+    def train(self,n_iter,n_episodes_per_update,n_max_steps,discount_factor,plot=False,verbose=True):
         self.build_network()
         optimizer=keras.optimizers.Adam(lr=0.01)
         loss_fn=keras.losses.SparseCategoricalCrossentropy()
@@ -158,15 +158,16 @@ class Solver():
             optimizer.apply_gradients(zip(all_mean_grads,self.model.trainable_variables))
 
             if iteration%10==0:
-                score=[scorer(reward) for reward in all_rewards]
-                print("Iteration: {}, time: {}, avg percent correct: {}, avg num eaten: {}".format(iteration,time.time()-start,np.average([s[0] for s in score]),np.average([s[1] for s in score])))       
+                if verbose==True:
+                    score=[scorer(reward) for reward in all_rewards]
+                    print("Iteration: {}, time: {}, avg percent correct: {}, avg num eaten: {}".format(iteration,time.time()-start,np.average([s[0] for s in score]),np.average([s[1] for s in score])))       
 
         self.scores=[np.average([scorer(reward)[1] for reward in rewards]) for rewards in self.every_reward]
         if plot==True:
             plt.plot(np.arange(1,len(self.scores)+1,1),self.scores)
             plt.show()
 
-    def test(self,n_steps):
+    def test(self,n_steps,verbose=True):
         obs=self.env.reset()
         result=[]
         for i in range(n_steps):
@@ -175,7 +176,8 @@ class Solver():
             n=random.random()
             action= np.argmax([a>n for a in summed])-1
             obs,reward=self.env.step(action)
-            print(self.env,reward)
+            if verbose==True:
+                print(self.env,reward)
             result.append((self.env.state(),reward))
         return result
 
@@ -187,6 +189,6 @@ class Solver():
         self.model.save(path) #'drive/My Drive/saved_model/my_model'
         
 clf=Solver()
-#clf.train(n_iter=250,n_episodes_per_update=25,n_max_steps=100,discount_factor=0.95)
-clf.load('rl_model')
+#clf.train(n_iter=250,n_episodes_per_update=25,n_max_steps=100,discount_factor=0.95) #train
+#clf.load('rl_model') #load using training stats above
 result=clf.test(n_steps=100)
