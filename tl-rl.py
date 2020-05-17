@@ -6,6 +6,7 @@ import random
 import copy
 import time
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 class Object():
     '''Object in the game, food or player'''
@@ -125,6 +126,29 @@ def scorer(rewards):
             n+=1
     return i/n,c
 
+
+def viz(result,fname=None):
+    def reset():
+        ax.cla()
+        ax.grid(linestyle='-', linewidth='0.5', color='black')
+        ax.set_xlim(0,20)
+        ax.set_ylim(0,20)
+        
+    def update(i):
+        if i!=0 and result[i][0]!=result[i-1][0]:
+                reset()
+        ax.scatter(*result[i][0],c='red')
+        ax.scatter(*result[i][1],c='blue')
+        return ax
+    result=[r[0] for r in result]
+    fig, ax = plt.subplots()
+    reset()
+    ani=animation.FuncAnimation(fig,update,interval=200,blit=False)
+    if fname==None:
+        plt.show()
+    else:
+        ani.save(fname)
+
 class Solver():
     def __init__(self):
         self.env=Game(xrange=(0,20),yrange=(0,20))
@@ -190,5 +214,6 @@ class Solver():
         
 clf=Solver()
 #clf.train(n_iter=250,n_episodes_per_update=25,n_max_steps=100,discount_factor=0.95) #train
-#clf.load('rl_model') #load using training stats above
-result=clf.test(n_steps=100)
+clf.load('rl_model') #load using training stats above
+result=clf.test(n_steps=100,verbose=False)
+viz(result,fname='rl.html')
